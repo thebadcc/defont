@@ -20,12 +20,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract deFont is Initializable, Ownable, UUPSUpgradeable {
     
     //@dev font mappings    
-    mapping(bytes => bytes) public map;
+    mapping (uint => mapping(bytes => bytes)) public map;
 
     //@dev edit font 
-    function setValue(string[] memory input, string[] memory output) public onlyOwner {
+    function setValue(uint index, string[] memory input, string[] memory output) public onlyOwner {
         for (uint256 i = 0; i < input.length; i++) {
-        map[bytes(input[i])] = bytes(output[i]);
+        map[index][bytes(input[i])] = bytes(output[i]);
         }
     }
 
@@ -69,12 +69,12 @@ contract deFont is Initializable, Ownable, UUPSUpgradeable {
     }
 
     //@dev convert font
-    function formatFont(string memory arr) public view returns(string memory) {
+    function formatFont(uint index, string memory arr) public view returns(string memory) {
         bytes[] memory ret = new bytes[](strlen(arr));
         bytes memory output;
         for (uint i = 0; i < strlen(arr); i++) {
-            if (map[bytes(getChar(arr, i))].length > 0){
-            ret[i] = map[bytes(getChar(arr, i))];
+            if (map[index][bytes(getChar(arr, i))].length > 0){
+            ret[i] = map[index][bytes(getChar(arr, i))];
             output = abi.encodePacked(output, ret[i]);
             } else {
             output = abi.encodePacked(output, getChar(arr, i));
