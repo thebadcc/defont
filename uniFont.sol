@@ -2,11 +2,11 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 /*
-       __     ______            __ 
-  ____/ /__  / ____/___  ____  / /_
- / __  / _ \/ /_  / __ \/ __ \/ __/
-/ /_/ /  __/ __/ / /_/ / / / / /_  
-\__,_/\___/_/    \____/_/ /_/\__/ v1
+                 _  ______               __ 
+  __  __ ____   (_)/ ____/____   ____   / /_
+ / / / // __ \ / // /_   / __ \ / __ \ / __/
+/ /_/ // / / // // __/  / /_/ // / / // /_  
+\__,_//_/ /_//_//_/     \____//_/ /_/ \__/ v1
 
 */
 
@@ -16,16 +16,18 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
-contract deFont is Initializable, Ownable, UUPSUpgradeable {
+//@dev uniFont contract
+contract uniFont is Initializable, Ownable, UUPSUpgradeable {
     
     //@dev font mappings    
     mapping (uint => mapping(bytes => bytes)) public map;
-
-    //@dev edit font 
+    mapping (uint => mapping(bytes => bytes)) public key;
+   
+    //@dev set font 
     function setValue(uint index, string[] memory input, string[] memory output) public onlyOwner {
         for (uint256 i = 0; i < input.length; i++) {
         map[index][bytes(input[i])] = bytes(output[i]);
+        key[index][bytes(output[i])] = bytes(input[i]);
         }
     }
 
@@ -68,8 +70,8 @@ contract deFont is Initializable, Ownable, UUPSUpgradeable {
         return string(CharByte);
     }
 
-    //@dev convert font
-    function formatFont(uint index, string memory arr) public view returns(string memory) {
+    //@dev format font
+    function format(uint index, string memory arr) public view returns(string memory) {
         bytes[] memory ret = new bytes[](strlen(arr));
         bytes memory output;
         for (uint i = 0; i < strlen(arr); i++) {
@@ -83,4 +85,18 @@ contract deFont is Initializable, Ownable, UUPSUpgradeable {
         return string(output);
     }
 
+    //@dev reset font
+    function reset(uint index, string memory arr) public view returns(string memory) {
+        bytes[] memory ret = new bytes[](strlen(arr));
+        bytes memory output;
+        for (uint i = 0; i < strlen(arr); i++) {
+            if (key[index][bytes(getChar(arr, i))].length > 0){
+            ret[i] = key[index][bytes(getChar(arr, i))];
+            output = abi.encodePacked(output, ret[i]);
+            } else {
+            output = abi.encodePacked(output, getChar(arr, i));
+            }
+        }
+        return string(output);
+    }
 }
